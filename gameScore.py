@@ -3,6 +3,10 @@ import string
 import random
 import glob
 
+global mutationRate, crossoverRate
+mutationRate = 1000
+crossoverRate = .5
+
 def main():
 	# open replay file
 	gamefile = open("./game_logs/0.replay", 'r')
@@ -43,25 +47,12 @@ def main():
 		if (len(outputList) == 0):
 			pass
 		else:
-			for fileName in outputList:
-				if (int(fileName.split("/")[-1][-5:]) > tempUniq):
-					tempUniq = int(fileName.split("/")[-1][-5:])
+			for fN in outputList:
+				if (int(fN.split("/")[-1][-5:]) > tempUniq):
+					tempUniq = int(fN.split("/")[-1][-5:])
 			tempUniq += 1
 
-		fileName = "./Chromosome/Processed/"
-		if (botScore[0] > botScore[1]):
-			fileName += str(((botScore[0]*10)+(antsLeft[0]*2))) + str(tempUniq).zfill(5)
-		elif (botScore[1] > botScore[0]):
-			fileName += str(((botScore[1]*10)+(antsLeft[1]*2))) + str(tempUniq).zfill(5)
-		elif (botScore[0] == botScore[1]):
-			if (antsLeft[0] > antsLeft[1]):
-				fileName += str(((botScore[0]*10)+(antsLeft[0]*2))) + str(tempUniq).zfill(5)
-			elif (antsLeft[1] > antsLeft[0]):
-				fileName += str(((botScore[1]*10)+(antsLeft[1]*2))) + str(tempUniq).zfill(5)
-			else:
-				mutChr = random.randint(0,1)
-				fileName += str((botScore[mutChr]*10)+(antsLeft[mutChr]*2)) + str(tempUniq).zfill(5)
-		
+		fileName = setFileName(create, tempUniq, botScore, antsLeft)
 
 		if (create == "M"):
 			if (botScore[0] > botScore[1]):
@@ -74,7 +65,7 @@ def main():
 				elif (antsLeft[1] > antsLeft[0]):
 					newChromosome = mutateChromosome(chromosomeList[1])
 				else:
-					newChromosome = mutateChromosome(chromosomeList[mutChr])
+					newChromosome = mutateChromosome(chromosomeList[0])
 		elif (create == "C1"):
 			newChromosome = crossoverChromosome(chromosomeList[0], chromosomeList[1], crossoverLocation)
 		elif (create == "C2"):
@@ -107,7 +98,7 @@ def mutateChromosome(chromo):
 	splitChromo = chromo.split(" ")
 	directions = ["n", "e", "s", "w"]
 	for indChromo in splitChromo:
-		if (random.randint(1,1000) == 500):
+		if (random.randint(1,mutationRate) == 1):
 			tempSplit = indChromo.split("-")
 			tempSplit[2] = directions[random.randint(0,3)]
 			indChromo = tempSplit[0] + "-" + tempSplit[1] + "-" + tempSplit[2]
@@ -121,14 +112,7 @@ def mutateChromosome(chromo):
 
 def chromosomeSplit(parent):
 	upperBound = len(parent.split(" "))
-	x = random.randint(0, upperBound)
-
-	if (x+504 > upperBound):
-		 x %= upperBound
-	else:
-		x += 504
-
-	return x
+	return int(upperBound * crossoverRate)
 
 
 def crossoverChromosome(parentOne, parentTwo, splitLocation):
@@ -158,5 +142,28 @@ def fileWrite(chromosome, fileName):
 		outputFile.close()
 
 	return
+
+
+def setFileName(create, tempUniq, botScore, antsLeft):
+	fileName = "./Chromosome/Processed/"
+	if (botScore[0] > botScore[1]):
+		tempNum = ((botScore[0]*10)+(antsLeft[0]*2))
+	elif (botScore[1] > botScore[0]):
+		tempNum = ((botScore[1]*10)+(antsLeft[1]*2))
+	elif (botScore[0] == botScore[1]):
+		if (antsLeft[0] > antsLeft[1]):
+			tempNum = ((botScore[0]*10)+(antsLeft[0]*2))
+		elif (antsLeft[1] > antsLeft[0]):
+			tempNum = ((botScore[1]*10)+(antsLeft[1]*2))
+		else:
+			tempNum = (botScore[0]*10)+(antsLeft[0]*2)
+
+	if create == "M":
+		pass
+	else:
+		tempNum = int(tempNum*crossoverRate)
+
+	return fileName + str(tempNum) + str(tempUniq).zfill(5)
+
 
 main()
