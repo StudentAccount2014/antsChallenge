@@ -96,16 +96,18 @@ def antFinder(antInfo):
 
 def mutateChromosome(chromo):
 	splitChromo = chromo.split(" ")
-	directions = ["n", "e", "s", "w"]
-	for indChromo in splitChromo:
-		if (random.randint(1,mutationRate) == 1):
-			tempSplit = indChromo.split("-")
-			tempSplit[2] = directions[random.randint(0,3)]
-			indChromo = tempSplit[0] + "-" + tempSplit[1] + "-" + tempSplit[2]
-
+	directions = ["N", "E", "S", "W"]
 	newChromo = ""
-	for chromosome in splitChromo:
-		newChromo += chromosome + " "
+	for indChromo in splitChromo:
+		tempSplit = indChromo.split("-")
+		if (random.randint(1,mutationRate) == 1):
+			newDir = tempSplit[2]
+			while (newDir == tempSplit[2]):
+				newDir = directions[random.randint(0,3)]
+
+			newChromo += tempSplit[0] + "-" + tempSplit[1] + "-" + newDir + " "
+		else:
+			newChromo += tempSplit[0] + "-" + tempSplit[1] + "-" + tempSplit[2] + " "
 
 	newChromo = newChromo.strip()
 	return newChromo
